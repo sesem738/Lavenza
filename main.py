@@ -5,7 +5,7 @@ import argparse
 import numpy as np
 
 import agent
-import memory
+import replay_buffer
 
 
 
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 		policy_file = file_name if args.load_model == "default" else args.load_model
 		policy.load(f"./models/{policy_file}")
 
-	replay_buffer = memory.ReplayBuffer(state_dim, action_dim)
+	replay_buffer = replay_buffer.ReplayBuffer(state_dim, action_dim)
 	
 	# Evaluate untrained policy
 	evaluations = [eval_policy(policy, args.env, args.seed)]
