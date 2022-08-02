@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from model.utils import PositionEncoding
+from model.utils import PositionalEncoding
 
 class STT(nn.Module):
 	def __init__(
