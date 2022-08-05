@@ -7,7 +7,12 @@ import numpy as np
 import agent
 import replay_buffer
 
+import warnings
+warnings.filterwarnings("ignore")
 
+if torch.cuda.is_available():
+    torch.backends.cuda.matmul.allow_tf32 = True
+    torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 # Runs policy for X episodes and returns average reward
 # A fixed seed is used for the eval environment
@@ -35,7 +40,7 @@ if __name__ == "__main__":
 	
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--policy", default="TD3")                  # Policy name (TD3, DDPG or OurDDPG)
-	parser.add_argument("--env", default="HalfCheetah-v2")          # OpenAI gym environment name
+	parser.add_argument("--env", default="Pendulum-v1")          # OpenAI gym environment name
 	parser.add_argument("--seed", default=0, type=int)              # Sets Gym, PyTorch and Numpy seeds
 	parser.add_argument("--start_timesteps", default=25e3, type=int)# Time steps initial random policy is used
 	parser.add_argument("--eval_freq", default=5e3, type=int)       # How often (time steps) we evaluate

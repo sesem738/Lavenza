@@ -6,8 +6,6 @@ import torch.nn.functional as F
 from actor import Actor
 from critic import Critic
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 class TD3(object):
 	def __init__(
 		self,
@@ -21,11 +19,11 @@ class TD3(object):
 		policy_freq=2
 	):
 
-		self.actor = Actor(state_dim, action_dim, max_action).to(device)
+		self.actor = Actor(state_dim, action_dim, max_action)
 		self.actor_target = copy.deepcopy(self.actor)
 		self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
 
-		self.critic = Critic(state_dim, action_dim).to(device)
+		self.critic = Critic(state_dim, action_dim)
 		self.critic_target = copy.deepcopy(self.critic)
 		self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
 
@@ -40,7 +38,7 @@ class TD3(object):
 
 
 	def select_action(self, state):
-		state = torch.FloatTensor(state.reshape(1, -1)).to(device)
+		state = torch.FloatTensor(state.reshape(1, -1))
 		return self.actor(state).cpu().data.numpy().flatten()
 
 
