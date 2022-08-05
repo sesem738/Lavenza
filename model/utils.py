@@ -54,6 +54,13 @@ class GRUGate(nn.Module):
 
 		return (1.0 - z) * x + z * h
 
+class ResidueGate(nn.Module):
+    def __init__(self, **kwargs):
+        super().__init__()
+
+    def forward(self, x, y):
+        return x + y
+
 class Split():
 	
 	def time_split(self):
@@ -61,3 +68,7 @@ class Split():
 
 	def space_split(self):
 		pass
+
+def generate_square_subsequent_mask(sz: int) -> torch.Tensor:
+    """Generates an upper-triangular matrix of -inf, with zeros on diag."""
+    return torch.triu(torch.ones(sz, sz) * float("-inf"), diagonal=1)
