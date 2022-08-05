@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from model.utils import PositionalEncoding
+from utils import PositionalEncoding
 
 class STT(nn.Module):
 	def __init__(
@@ -21,7 +21,7 @@ class STT(nn.Module):
 		self.obs_dim = obs_dim
 		self.action_dim = num_actions
 		# Embed Action Space if Critic
-		self.pos_encoder = PositionEncoding(dmodel, dropout)
+		self.pos_encoder = PositionalEncoding(dmodel, dropout)
 		self.dropout = nn.Dropout(dropout)
 		self.laynorm_ffn = nn.LayerNorm(embed_size)
 		self.space_att_bias = nn.Linear(embed_size,1)
