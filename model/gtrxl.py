@@ -2,8 +2,9 @@ import torch
 import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
-from utils import PositionalEncoding, GRUGate, ResidueGate, generate_square_subsequent_mask
+from model.utils import PositionalEncoding, generate_square_subsequent_mask
 from typing import Optional
+
 
 class GTrXLLayer(nn.TransformerEncoderLayer):
     def __init__(
@@ -50,10 +51,10 @@ class GTrXLLayer(nn.TransformerEncoderLayer):
 
         return output
 
+
 class GTrXL(nn.Module):
     def __init__(
         self,
-        ntoken: int,
         d_model: int,
         nhead: int,
         d_hid: int,
@@ -87,5 +88,6 @@ class GTrXL(nn.Module):
         )
         return output
 
+
 if __name__ == "__main__":
-    GTrXL(128,128,4,128,2)
+    GTrXL(128, 128, 4, 128, 2)

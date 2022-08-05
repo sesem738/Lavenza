@@ -1,15 +1,14 @@
 import torch
 import numpy as np
-from  torch.nn import Module, TransformerEncoderLayer, TransformerEncoder, LayerNorm
+import torch.nn as nn
 import torch.nn.functional as F
-from utils import PositionalEncoding, generate_square_subsequent_mask
+from model.utils import PositionalEncoding, generate_square_subsequent_mask
 from typing import Optional
 
 
 class BERT(Module):
     def __init__(
         self,
-        ntoken: int,
         d_model: int,
         nhead: int,
         d_hid: int,
@@ -20,11 +19,11 @@ class BERT(Module):
         super().__init__()
 
         self.pos_encoder = PositionalEncoding(d_model, dropout)
-        encoder_layers = TransformerEncoderLayer(
+        encoder_layers = nn.TransformerEncoderLayer(
             d_model, nhead, d_hid, dropout, batch_first=True
         )
-        encoder_norm = LayerNorm(d_model, eps=layer_norm_eps)
-        self.transformer_encoder = TransformerEncoder(
+        encoder_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
+        self.transformer_encoder = nn.TransformerEncoder(
             encoder_layers, nlayers, encoder_norm
         )
 
@@ -47,5 +46,6 @@ class BERT(Module):
         # output = self.decoder(output)
         return output
 
+
 if __name__ == "__main__":
-    BERT(128,128,4,128,2)
+    BERT(128, 128, 4, 128, 2)
