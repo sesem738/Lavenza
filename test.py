@@ -1,4 +1,3 @@
-
 obs_dim = 288
 act_dim = 1
 mem_pre_lstm_hid_sizes = (128,)
