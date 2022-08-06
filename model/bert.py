@@ -6,7 +6,7 @@ from model.utils import PositionalEncoding, generate_square_subsequent_mask
 from typing import Optional
 
 
-class BERT(Module):
+class BERT(nn.Module):
     def __init__(
         self,
         d_model: int,
@@ -38,14 +38,19 @@ class BERT(Module):
         Returns:
             output Tensor of shape [seq_len, batch_size, ntoken]
         """
-        # src = self.pos_encoder(src)
+        src = self.pos_encoder(src)
         output = self.transformer_encoder(
-            src, generate_square_subsequent_mask(src.size(0))
+            src, generate_square_subsequent_mask(src.size(-2))
         )
-        print(output.shape)
         # output = self.decoder(output)
         return output
 
 
 if __name__ == "__main__":
-    BERT(128, 128, 4, 128, 2)
+    if torch.cuda.is_available():
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.set_default_tensor_type("torch.cuda.FloatTensor")
+
+    layer = BERT(16, 2, 256, 2)
+    src = torch.randn(256, 4, 16)
+    print(src.device, layer(src).device)

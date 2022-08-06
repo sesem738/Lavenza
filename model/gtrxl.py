@@ -61,6 +61,7 @@ class GTrXL(nn.Module):
         nlayers: int,
         dropout: float = 0.5,
         layer_norm_eps: float = 1e-5,
+        **kwargs,
     ):
         super(GTrXL, self).__init__()
 
@@ -90,4 +91,10 @@ class GTrXL(nn.Module):
 
 
 if __name__ == "__main__":
-    GTrXL(128, 128, 4, 128, 2)
+    if torch.cuda.is_available():
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.set_default_tensor_type("torch.cuda.FloatTensor")
+
+    layer = GTrXL(16, 2, 256, 2)
+    src = torch.randn(256, 4, 16)
+    print(src.device, layer(src).device)
