@@ -20,11 +20,19 @@ class TD3(object):
         policy_freq=2,
     ):
 
-        self.actor = Actor(state_dim, action_dim, max_action, his_len=5, transformer_core=None)
+        self.actor = Actor(
+            state_dim, action_dim, max_action, history_len=5, transformer_core=None
+        )
         self.actor_target = copy.deepcopy(self.actor)
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
 
-        self.critic = Critic(state_dim, action_dim, act_embed_size=256, his_len=5, transformer_core=None)
+        self.critic = Critic(
+            state_dim,
+            action_dim,
+            act_embed_size=256,
+            history_len=5,
+            transformer_core=None,
+        )
         self.critic_target = copy.deepcopy(self.critic)
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
 
@@ -46,9 +54,10 @@ class TD3(object):
 
         # Sample replay buffer
         state, action, next_state, reward, not_done = replay_buffer.prior_samples(
-            batch_size, 
-            his_len = 5
+            batch_size, his_len=5
         )
+
+        print(state.shape)
 
         with torch.no_grad():
             # Select action according to policy and add clipped noise

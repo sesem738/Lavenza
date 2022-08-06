@@ -47,7 +47,7 @@ if __name__ == "__main__":
         "--seed", default=0, type=int
     )  # Sets Gym, PyTorch and Numpy seeds
     parser.add_argument(
-        "--start_timesteps", default=25e3, type=int
+        "--start_timesteps", default=1e3, type=int
     )  # Time steps initial random policy is used
     parser.add_argument(
         "--eval_freq", default=5e3, type=int
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     replay_buffer = replay_buffer.ReplayBuffer(state_dim, action_dim)
 
     # Evaluate untrained policy
-    evaluations = [eval_policy(policy, args.env, args.seed)]
+    # evaluations = [eval_policy(policy, args.env, args.seed)]
 
     state, done = env.reset(), False
     episode_reward = 0
@@ -146,6 +146,7 @@ if __name__ == "__main__":
         if t < args.start_timesteps:
             action = env.action_space.sample()
         else:
+            print("Time: ", t)
             action = (
                 policy.select_action(buffer)
                 + np.random.normal(0, max_action * args.expl_noise, size=action_dim)
@@ -179,8 +180,8 @@ if __name__ == "__main__":
             obs_buffer = deque([np.zeros(buffer.shape)]*his_len, maxlen=his_len)
 
         # Evaluate episode
-        if (t + 1) % args.eval_freq == 0:
-            evaluations.append(eval_policy(policy, args.env, args.seed))
-            np.save(f"./results/{file_name}", evaluations)
-            if save_model:
-                policy.save(f"./models/{file_name}")
+        # if (t + 1) % args.eval_freq == 0:
+        #     evaluations.append(eval_policy(policy, args.env, args.seed))
+        #     np.save(f"./results/{file_name}", evaluations)
+        #     if save_model:
+        #         policy.save(f"./models/{file_name}")

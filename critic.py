@@ -61,10 +61,10 @@ class Critic(nn.Module):
 
     def forward(self, state, action):
         a = self.action_embedded(action)
-        print(a.shape)
+        # print(a.shape)
 
         sa = torch.cat([state, a], -1)
-        print(sa.shape)
+        # print(sa.shape)
 
         x = sa
         if self.transformer_core is not None:
