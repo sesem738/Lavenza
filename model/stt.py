@@ -48,7 +48,6 @@ class STTLayer(nn.TransformerEncoderLayer):
 
         gate_dict = {"residue": ResidueGate, "gru": GRUGate}
         self.gate = gate_dict[gate_type]()
-        self.resgate = ResidueGate()
 
         self.apply(self._init_weights)
 
@@ -92,7 +91,7 @@ class STTLayer(nn.TransformerEncoderLayer):
                 ).permute(0, 2, 1),
             )  # No masking for spatial attention
             x = x_time + x_space
-            x = self.resgate(x, self._ff_block(self.norm2(x)))
+            x = self.gate(x, self._ff_block(self.norm2(x)))
         else:
             x_time = self.norm_time(
                 self.gate(
@@ -144,6 +143,7 @@ class STT(nn.Module):
         dropout: float = 0.5,
         layer_norm_eps: float = 1e-5,
         gate_type="residue",
+        norm_first=False,
     ):
         super().__init__()
 
@@ -156,6 +156,7 @@ class STT(nn.Module):
             dropout,
             batch_first=True,
             gate_type=gate_type,
+            norm_first=norm_first,
         )
         encoder_norm = nn.LayerNorm(d_model, eps=layer_norm_eps)
         self.transformer_encoder = nn.TransformerEncoder(
