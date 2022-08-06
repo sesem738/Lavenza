@@ -11,39 +11,49 @@ class ReplayBuffer(object):
         self.ptr = 0
         self.size = 0
 
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.state = torch.zeros(
-            (max_size, state_dim), dtype=torch.float32, device=self.device
+            (max_size, state_dim),
+            dtype=torch.float32,
         )
         self.action = torch.zeros(
-            (max_size, action_dim), dtype=torch.float32, device=self.device
+            (max_size, action_dim),
+            dtype=torch.float32,
         )
         self.next_state = torch.zeros(
-            (max_size, state_dim), dtype=torch.float32, device=self.device
+            (max_size, state_dim),
+            dtype=torch.float32,
         )
         self.reward = torch.zeros(
-            (max_size, 1), dtype=torch.float32, device=self.device
+            (max_size, 1),
+            dtype=torch.float32,
         )
         self.not_done = torch.zeros(
-            (max_size, 1), dtype=torch.float32, device=self.device
+            (max_size, 1),
+            dtype=torch.float32,
         )
 
     def add(self, state, action, next_state, reward, done):
         self.state[self.ptr] = torch.as_tensor(
-            state, dtype=torch.float32, device=self.device
+            state,
+            dtype=torch.float32,
         )
         self.action[self.ptr] = torch.as_tensor(
-            action, dtype=torch.float32, device=self.device
+            action,
+            dtype=torch.float32,
         )
         self.next_state[self.ptr] = torch.as_tensor(
-            next_state, dtype=torch.float32, device=self.device
+            next_state,
+            dtype=torch.float32,
         )
         self.reward[self.ptr] = torch.as_tensor(
-            reward, dtype=torch.float32, device=self.device
+            reward,
+            dtype=torch.float32,
         )
-        self.not_done[self.ptr] = 1.0 - torch.as_tensor(
-            done, dtype=torch.float32, device=self.device
+        self.not_done[self.ptr] = torch.as_tensor(
+            done,
+            dtype=torch.float32,
         )
 
         self.ptr = (self.ptr + 1) % self.max_size
@@ -66,23 +76,22 @@ class ReplayBuffer(object):
         obs = torch.zeros(
             [batch_size, his_len, self.state_dim],
             dtype=torch.float32,
-            device=self.device,
         )
         actions = torch.zeros(
             [batch_size, his_len, self.action_dim],
             dtype=torch.float32,
-            device=self.device,
         )
         next_obs = torch.zeros(
             [batch_size, his_len, self.state_dim],
             dtype=torch.float32,
-            device=self.device,
         )
         rewards = torch.zeros(
-            [batch_size, his_len, 1], dtype=torch.float32, device=self.device
+            [batch_size, his_len, 1],
+            dtype=torch.float32,
         )
         not_done = torch.zeros(
-            [batch_size, his_len, 1], dtype=torch.float32, device=self.device
+            [batch_size, his_len, 1],
+            dtype=torch.float32,
         )
         # his_obs_len = his_len * np.ones(batch_size)
 
@@ -104,6 +113,7 @@ class ReplayBuffer(object):
 
         not_valid = True
         while not_valid:
+            self.not_done = self.not_done.cpu()
 
             # Check sequence for termination
             if len(np.where(self.not_done[start_id:id] == 1)[0]) != 0:

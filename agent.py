@@ -46,8 +46,8 @@ class TD3(object):
         self.total_it = 0
 
     def select_action(self, state):
-        state = torch.FloatTensor(state.reshape(1, -1))
-        return self.actor(state).cpu().data.numpy().flatten()
+        state = torch.Tensor(state)
+        return self.actor(state).detach().cpu().numpy().flatten()
 
     def train(self, replay_buffer, batch_size=256):
         self.total_it += 1
@@ -65,14 +65,22 @@ class TD3(object):
                 -self.noise_clip, self.noise_clip
             )
 
+            # action shape [batch_size, history_len, action_dim]
+            # self.actor_target(next_state) shape [batch_size, action_dim]
+
             next_action = (self.actor_target(next_state) + noise).clamp(
                 -self.max_action, self.max_action
             )
 
+            # action.pop[0].append(next_action)
+            # critic next_action.repeat(1, history_len ,1)
+
             # Compute the target Q value
+            # next_state shape [batch_size, history_len, state_dim]
+            # next action: [batch_size, history_len, action_dim]
             target_Q1, target_Q2 = self.critic_target(next_state, next_action)
             target_Q = torch.min(target_Q1, target_Q2)
-            target_Q = reward + not_done * self.discount * target_Q
+            target_Q = reward + (1 - not_done) * self.discount * target_Q
 
         # Get current Q estimates
         current_Q1, current_Q2 = self.critic(state, action)
