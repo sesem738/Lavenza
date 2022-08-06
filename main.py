@@ -3,6 +3,7 @@ import gym
 import torch
 import argparse
 import numpy as np
+from collections import deque
 
 import agent
 import replay_buffer
@@ -99,6 +100,7 @@ if __name__ == "__main__":
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     max_action = float(env.action_space.high[0])
+    his_len = 5
 
     kwargs = {
         "state_dim": state_dim,
@@ -129,17 +131,23 @@ if __name__ == "__main__":
     episode_reward = 0
     episode_timesteps = 0
     episode_num = 0
+    buffer     = np.zeros([1, state_dim])
+    obs_buffer = deque([np.zeros(buffer.shape)]*his_len, maxlen=his_len)
 
     for t in range(int(args.max_timesteps)):
 
         episode_timesteps += 1
+
+        obs_buffer.append([state])
+        assert np.array(obs_buffer).shape == (his_len, 1, state_dim)
+        buffer = np.array(obs_buffer).reshape(1,his_len, state_dim)
 
         # Select action randomly or according to policy
         if t < args.start_timesteps:
             action = env.action_space.sample()
         else:
             action = (
-                policy.select_action(np.array(state))
+                policy.select_action(buffer)
                 + np.random.normal(0, max_action * args.expl_noise, size=action_dim)
             ).clip(-max_action, max_action)
 
@@ -167,6 +175,8 @@ if __name__ == "__main__":
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
+            buffer     = np.zeros([1, state_dim])
+            obs_buffer = deque([np.zeros(buffer.shape)]*his_len, maxlen=his_len)
 
         # Evaluate episode
         if (t + 1) % args.eval_freq == 0:
