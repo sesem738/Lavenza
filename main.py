@@ -131,8 +131,7 @@ if __name__ == "__main__":
     episode_reward = 0
     episode_timesteps = 0
     episode_num = 0
-    buffer     = np.zeros([1, state_dim])
-    obs_buffer = deque([np.zeros(buffer.shape)]*his_len, maxlen=his_len)
+    obs_buffer = deque([np.zeros([1, state_dim])]*his_len, maxlen=his_len)
 
     for t in range(int(args.max_timesteps)):
 
@@ -154,7 +153,7 @@ if __name__ == "__main__":
 
         # Perform action
         next_state, reward, done, _ = env.step(action)
-        done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
+        done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0    ### ???
 
         # Store data in replay buffer
         replay_buffer.add(state, action, next_state, reward, done_bool)
@@ -176,8 +175,7 @@ if __name__ == "__main__":
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
-            buffer     = np.zeros([1, state_dim])
-            obs_buffer = deque([np.zeros(buffer.shape)]*his_len, maxlen=his_len)
+            obs_buffer = deque([np.zeros([1, state_dim])]*his_len, maxlen=his_len)
 
         # Evaluate episode
         # if (t + 1) % args.eval_freq == 0:
