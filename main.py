@@ -131,7 +131,7 @@ if __name__ == "__main__":
     episode_reward = 0
     episode_timesteps = 0
     episode_num = 0
-    obs_buffer = deque([np.zeros([1, state_dim])]*his_len, maxlen=his_len)
+    obs_buffer = deque([np.zeros([1, state_dim])] * his_len, maxlen=his_len)
 
     for t in range(int(args.max_timesteps)):
 
@@ -139,13 +139,12 @@ if __name__ == "__main__":
 
         obs_buffer.append([state])
         assert np.array(obs_buffer).shape == (his_len, 1, state_dim)
-        buffer = np.array(obs_buffer).reshape(1,his_len, state_dim)
+        buffer = np.array(obs_buffer).reshape(1, his_len, state_dim)
 
         # Select action randomly or according to policy
         if t < args.start_timesteps:
             action = env.action_space.sample()
         else:
-            print("Time: ", t)
             action = (
                 policy.select_action(buffer)
                 + np.random.normal(0, max_action * args.expl_noise, size=action_dim)
@@ -153,7 +152,7 @@ if __name__ == "__main__":
 
         # Perform action
         next_state, reward, done, _ = env.step(action)
-        done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0    ### ???
+        done_bool = float(done) if episode_timesteps < env._max_episode_steps else 0
 
         # Store data in replay buffer
         replay_buffer.add(state, action, next_state, reward, done_bool)
@@ -175,7 +174,7 @@ if __name__ == "__main__":
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
-            obs_buffer = deque([np.zeros([1, state_dim])]*his_len, maxlen=his_len)
+            obs_buffer = deque([np.zeros([1, state_dim])] * his_len, maxlen=his_len)
 
         # Evaluate episode
         # if (t + 1) % args.eval_freq == 0:
