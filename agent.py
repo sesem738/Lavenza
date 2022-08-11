@@ -61,23 +61,19 @@ class TD3(object):
 
         with torch.no_grad():
             # Select action according to policy and add clipped noise
-            noise = (torch.randn_like(action) * self.policy_noise).clamp(
+            next_action = self.actor_target(next_state)
+            
+            noise = (torch.randn_like(next_action) * self.policy_noise).clamp(
                 -self.noise_clip, self.noise_clip
             )
 
-            # action shape [batch_size, history_len, action_dim]
-            # self.actor_target(next_state) shape [batch_size, action_dim]
-
-            next_action = (self.actor_target(next_state) + noise).clamp(
+            next_action = (next_action + noise).clamp(
                 -self.max_action, self.max_action
             )
 
             # action.pop[0].append(next_action)
-            # critic next_action.repeat(1, history_len ,1)
 
             # Compute the target Q value
-            # next_state shape [batch_size, history_len, state_dim]
-            # next action: [batch_size, history_len, action_dim]
             target_Q1, target_Q2 = self.critic_target(next_state, next_action)
             target_Q = torch.min(target_Q1, target_Q2)
             target_Q = reward + (1 - not_done) * self.discount * target_Q
