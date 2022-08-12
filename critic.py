@@ -17,6 +17,10 @@ class Critic(nn.Module):
     ):
         super(Critic, self).__init__()
 
+        self.state_embedded = nn.Linear(
+            (state_dim * history_len) , act_embed_size
+        )
+
         # Embedding Action in higher dimensional space
         self.action_embedded = nn.Linear(
             action_dim, act_embed_size
@@ -25,8 +29,8 @@ class Critic(nn.Module):
         self.transformer_core = transformer_core
 
         if self.transformer_core is None:
-            self.l1 = nn.Linear(state_dim + act_embed_size, 256)
-            self.l4 = nn.Linear(state_dim + act_embed_size, 256)
+            self.l1 = nn.Linear(act_embed_size + act_embed_size, 256)
+            self.l4 = nn.Linear(act_embed_size + act_embed_size, 256)
         else:
             valid_core = ["BERT", "GTrXL", "STT"]
             if self.transformer_core not in valid_core:
@@ -60,9 +64,13 @@ class Critic(nn.Module):
         self.l6 = nn.Linear(256, 1)
 
     def forward(self, state, action):
+
+        state = state.flatten(1)
+
+        s = self.state_embedded(state)
         a = self.action_embedded(action)
 
-        sa = torch.cat([state, a], -1)
+        sa = torch.cat([s, a], 1)
 
         x = sa
         if self.transformer_core is not None:
@@ -70,8 +78,6 @@ class Critic(nn.Module):
             x = self.embedding(x)
             x = self.transformer(x)
             x = self.flatten(torch.flatten(x, 1))
-        else:
-            x = x[:, 0, :]
 
         q1 = F.relu(self.l1(x))
         q1 = F.relu(self.l2(q1))
@@ -83,7 +89,13 @@ class Critic(nn.Module):
         return q1, q2
 
     def Q1(self, state, action):
-        sa = torch.cat([state, action], 1)
+
+        state = state.flatten(1)
+
+        s = self.state_embedded(state)
+        a = self.action_embedded(action)
+
+        sa = torch.cat([s, a], 1)
 
         q1 = F.relu(self.l1(sa))
         q1 = F.relu(self.l2(q1))

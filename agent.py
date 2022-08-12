@@ -57,8 +57,6 @@ class TD3(object):
             batch_size, his_len=5
         )
 
-        print(state.shape)
-
         with torch.no_grad():
             # Select action according to policy and add clipped noise
             next_action = self.actor_target(next_state)
@@ -76,10 +74,10 @@ class TD3(object):
             # Compute the target Q value
             target_Q1, target_Q2 = self.critic_target(next_state, next_action)
             target_Q = torch.min(target_Q1, target_Q2)
-            target_Q = reward + (1 - not_done) * self.discount * target_Q
+            target_Q = reward[:,4,:] + (1 - not_done[:,4,:]) * self.discount * target_Q
 
         # Get current Q estimates
-        current_Q1, current_Q2 = self.critic(state, action)
+        current_Q1, current_Q2 = self.critic(state, action[:,-1,:])
 
         # Compute critic loss
         critic_loss = F.mse_loss(current_Q1, target_Q) + F.mse_loss(
@@ -93,6 +91,7 @@ class TD3(object):
 
         # Delayed policy updates
         if self.total_it % self.policy_freq == 0:
+            
 
             # Compute actor losse
             actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
