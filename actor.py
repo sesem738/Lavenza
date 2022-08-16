@@ -42,7 +42,7 @@ class Actor(nn.Module):
             self.transformer = globals()[self.transformer_core](
                 d_model=256,
                 history_len=history_len,
-                nhead=2,
+                nhead=1,
                 d_hid=256,
                 nlayers=2,
                 dropout=0.5,

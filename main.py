@@ -100,7 +100,7 @@ if __name__ == "__main__":
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.shape[0]
     max_action = float(env.action_space.high[0])
-    his_len = 5
+    his_len = 6
 
     kwargs = {
         "state_dim": state_dim,

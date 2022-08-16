@@ -21,7 +21,7 @@ class TD3(object):
     ):
 
         self.actor = Actor(
-            state_dim, action_dim, max_action, history_len=5, transformer_core=None
+            state_dim, action_dim, max_action, history_len=6, transformer_core="STT"
         )
         self.actor_target = copy.deepcopy(self.actor)
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
@@ -30,8 +30,8 @@ class TD3(object):
             state_dim,
             action_dim,
             act_embed_size=256,
-            history_len=5,
-            transformer_core=None,
+            history_len=6,
+            transformer_core="STT",
         )
         self.critic_target = copy.deepcopy(self.critic)
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
