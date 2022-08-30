@@ -47,7 +47,7 @@ if __name__ == "__main__":
         "--seed", default=0, type=int
     )  # Sets Gym, PyTorch and Numpy seeds
     parser.add_argument(
-        "--start_timesteps", default=1e3, type=int
+        "--start_timesteps", default=200, type=int
     )  # Time steps initial random policy is used
     parser.add_argument(
         "--eval_freq", default=5e3, type=int

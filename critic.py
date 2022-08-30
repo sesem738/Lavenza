@@ -41,7 +41,7 @@ class Critic(nn.Module):
             self.transformer = globals()[self.transformer_core](
                 d_model=256,
                 history_len=history_len,
-                nhead=2,
+                nhead=1,
                 d_hid=256,
                 nlayers=2,
                 dropout=0.5,
@@ -71,7 +71,7 @@ class Critic(nn.Module):
             x = self.transformer(x)
             x = self.flatten(torch.flatten(x, 1))
         else:
-            x = x[:, 0, :]
+            x = x[:, -1, :]
 
         q1 = F.relu(self.l1(x))
         q1 = F.relu(self.l2(q1))
@@ -83,9 +83,20 @@ class Critic(nn.Module):
         return q1, q2
 
     def Q1(self, state, action):
-        sa = torch.cat([state, action], 1)
+        a = self.action_embedded(action)
 
-        q1 = F.relu(self.l1(sa))
+        sa = torch.cat([state, a], -1)
+
+        x = sa
+        if self.transformer_core is not None:
+            # Continuous embedding
+            x = self.embedding(x)
+            x = self.transformer(x)
+            x = self.flatten(torch.flatten(x, 1))
+        else:
+            x = x[:, -1, :]
+
+        q1 = F.relu(self.l1(x))
         q1 = F.relu(self.l2(q1))
         q1 = self.l3(q1)
         return q1
@@ -103,3 +114,4 @@ if __name__ == "__main__":
     act = torch.randn(5, history_len, 1)
     q1, q2 = a(obs, act)
     print(q1.shape, q2.device)
+    print(a.Q1(obs, act))

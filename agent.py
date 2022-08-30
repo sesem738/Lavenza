@@ -21,7 +21,7 @@ class TD3(object):
     ):
 
         self.actor = Actor(
-            state_dim, action_dim, max_action, history_len=5, transformer_core=None
+            state_dim, action_dim, max_action, history_len=5, transformer_core="STT"
         )
         self.actor_target = copy.deepcopy(self.actor)
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=3e-4)
@@ -31,7 +31,7 @@ class TD3(object):
             action_dim,
             act_embed_size=256,
             history_len=5,
-            transformer_core=None,
+            transformer_core="STT",
         )
         self.critic_target = copy.deepcopy(self.critic)
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=3e-4)
@@ -57,8 +57,6 @@ class TD3(object):
             batch_size, his_len=5
         )
 
-        print(state.shape)
-
         with torch.no_grad():
             # Select action according to policy and add clipped noise
             noise = (torch.randn_like(action) * self.policy_noise).clamp(
@@ -67,10 +65,13 @@ class TD3(object):
 
             # action shape [batch_size, history_len, action_dim]
             # self.actor_target(next_state) shape [batch_size, action_dim]
-
-            next_action = (self.actor_target(next_state) + noise).clamp(
-                -self.max_action, self.max_action
-            )
+            FIFO = False
+            next_action = self.actor_target(next_state)
+            if not FIFO:
+                next_action = next_action.repeat(1, 5).view(-1, 5, 1)
+            else:
+                pass
+            next_action = (next_action + noise).clamp(-self.max_action, self.max_action)
 
             # action.pop[0].append(next_action)
             # critic next_action.repeat(1, history_len ,1)
@@ -80,7 +81,9 @@ class TD3(object):
             # next action: [batch_size, history_len, action_dim]
             target_Q1, target_Q2 = self.critic_target(next_state, next_action)
             target_Q = torch.min(target_Q1, target_Q2)
-            target_Q = reward + (1 - not_done) * self.discount * target_Q
+            target_Q = (
+                reward[:, -1, :] + (1 - not_done[:, -1, :]) * self.discount * target_Q
+            )
 
         # Get current Q estimates
         current_Q1, current_Q2 = self.critic(state, action)
@@ -98,8 +101,16 @@ class TD3(object):
         # Delayed policy updates
         if self.total_it % self.policy_freq == 0:
 
+            action = self.actor(state)
+
+            FIFO = False
+            if not FIFO:
+                action = action.repeat(1, 5).view(-1, 5, 1)
+            else:
+                pass
+
             # Compute actor losse
-            actor_loss = -self.critic.Q1(state, self.actor(state)).mean()
+            actor_loss = -self.critic.Q1(state, action).mean()
 
             # Optimize the actor
             self.actor_optimizer.zero_grad()

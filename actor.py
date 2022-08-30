@@ -42,7 +42,7 @@ class Actor(nn.Module):
             self.transformer = globals()[self.transformer_core](
                 d_model=256,
                 history_len=history_len,
-                nhead=2,
+                nhead=1,
                 d_hid=256,
                 nlayers=2,
                 dropout=0.5,
@@ -65,7 +65,7 @@ class Actor(nn.Module):
             x = self.transformer(x)
             x = self.flatten(torch.flatten(x, 1))
         else:
-            x = x[:, 0, :]
+            x = x[:, -1, :]
 
         a = F.relu(self.l1(x))
         a = F.relu(self.l2(a))
